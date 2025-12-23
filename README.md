@@ -139,7 +139,7 @@ AnimeLog/
 
 3. **Start development server**
    ```bash
-   npm run dev
+   npm run dev -- --host
    ```
    Frontend will be available at `http://localhost:5173`
 
