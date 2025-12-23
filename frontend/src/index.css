@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-anime-dark-900 text-gray-100;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-anime-dark-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-anime-dark-500 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-anime-dark-600;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-anime-primary to-anime-secondary text-white hover:opacity-90 hover:shadow-lg hover:shadow-anime-primary/25;
+  }
+
+  .btn-secondary {
+    @apply bg-anime-dark-600 text-white hover:bg-anime-dark-500 border border-anime-dark-500;
+  }
+
+  .btn-outline {
+    @apply border-2 border-anime-primary text-anime-primary hover:bg-anime-primary hover:text-white;
+  }
+
+  .btn-ghost {
+    @apply text-gray-400 hover:text-white hover:bg-anime-dark-700;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-anime-dark-700 border border-anime-dark-500 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-anime-primary focus:border-transparent transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-anime-dark-800 rounded-xl border border-anime-dark-600 overflow-hidden transition-all duration-300 hover:border-anime-dark-500 hover:shadow-xl;
+  }
+
+  .card-hover {
+    @apply hover:transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-anime-primary/10;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-anime-primary/20 text-anime-primary;
+  }
+
+  .badge-secondary {
+    @apply bg-anime-secondary/20 text-anime-secondary;
+  }
+
+  .badge-accent {
+    @apply bg-anime-accent/20 text-anime-accent;
+  }
+
+  .link {
+    @apply text-anime-accent hover:text-anime-primary transition-colors duration-200;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-display font-bold bg-gradient-to-r from-anime-primary to-anime-accent bg-clip-text text-transparent;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-anime-primary via-anime-secondary to-anime-accent bg-clip-text text-transparent;
+  }
+
+  .glass {
+    @apply bg-anime-dark-800/80 backdrop-blur-xl border border-anime-dark-600/50;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
