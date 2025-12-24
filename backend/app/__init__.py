@@ -1,6 +1,7 @@
 """
 AnimeLog Backend - Flask Application Factory
 """
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -24,9 +25,20 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     jwt.init_app(app)
     bcrypt.init_app(app)
+    
+    # CORS - Allow Vercel frontend and localhost for development
+    allowed_origins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+    # Add production frontend URL from environment
+    frontend_url = os.getenv('FRONTEND_URL')
+    if frontend_url:
+        allowed_origins.append(frontend_url)
+    
     CORS(app, 
          supports_credentials=True, 
-         origins=["http://localhost:5173"],
+         origins=allowed_origins,
          allow_headers=["Content-Type", "Authorization"],
          expose_headers=["Content-Type", "Authorization"]
     )
