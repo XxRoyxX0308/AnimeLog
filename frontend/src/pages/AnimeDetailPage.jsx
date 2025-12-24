@@ -223,17 +223,8 @@ export default function AnimeDetailPage() {
                     onClick={() => setShowReviewModal(true)}
                     className="btn btn-secondary"
                   >
-                    {userReview ? (
-                      <>
-                        <PencilIcon className="w-4 h-4 mr-2" />
-                        Edit Review
-                      </>
-                    ) : (
-                      <>
-                        <StarIcon className="w-4 h-4 mr-2" />
-                        Write Review
-                      </>
-                    )}
+                    <StarIcon className="w-4 h-4 mr-2" />
+                    Write Review
                   </button>
                 </>
               ) : (
@@ -390,7 +381,7 @@ export default function AnimeDetailPage() {
       {showReviewModal && (
         <ReviewModal
           anime={anime}
-          review={userReview}
+          review={null}
           onClose={() => setShowReviewModal(false)}
           onSave={handleReviewSaved}
         />

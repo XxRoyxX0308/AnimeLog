@@ -11,6 +11,7 @@ import CatalogPage from './pages/CatalogPage'
 import AnimeDetailPage from './pages/AnimeDetailPage'
 import DashboardPage from './pages/DashboardPage'
 import MyLogsPage from './pages/MyLogsPage'
+import MyReviewsPage from './pages/MyReviewsPage'
 import CommunityPage from './pages/CommunityPage'
 import ReviewDetailPage from './pages/ReviewDetailPage'
 import ProfilePage from './pages/ProfilePage'
@@ -63,6 +64,11 @@ function App() {
         <Route path="my-logs" element={
           <ProtectedRoute>
             <MyLogsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="my-reviews" element={
+          <ProtectedRoute>
+            <MyReviewsPage />
           </ProtectedRoute>
         } />
       </Route>

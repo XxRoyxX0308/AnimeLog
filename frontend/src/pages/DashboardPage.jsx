@@ -203,7 +203,7 @@ export default function DashboardPage() {
                   <StarIcon className="w-5 h-5 text-anime-secondary" />
                   <h2 className="font-semibold text-white">My Reviews</h2>
                 </div>
-                <Link to="/my-logs?tab=reviews" className="text-sm text-anime-accent hover:text-anime-primary">
+                <Link to="/my-reviews" className="text-sm text-anime-accent hover:text-anime-primary">
                   View All
                 </Link>
               </div>

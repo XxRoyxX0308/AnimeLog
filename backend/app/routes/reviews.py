@@ -29,7 +29,9 @@ def get_reviews():
     # Filters
     anime_id = request.args.get('anime_id', type=int)
     user_id = request.args.get('user_id', type=int)
+    search = request.args.get('search', '').strip()
     sort_by = request.args.get('sort_by', 'recent')  # recent, rating, likes
+    sort = request.args.get('sort', '').strip()  # Alternate param name: newest, popular, highest
     
     query = Review.query
     
@@ -39,12 +41,24 @@ def get_reviews():
     if user_id:
         query = query.filter(Review.user_id == user_id)
     
-    # Sorting
-    if sort_by == 'rating':
+    # Search filter - search in review title, content, or anime title
+    if search:
+        from sqlalchemy import or_
+        query = query.join(Anime).filter(
+            or_(
+                Review.title.ilike(f'%{search}%'),
+                Review.content.ilike(f'%{search}%'),
+                Anime.title.ilike(f'%{search}%')
+            )
+        )
+    
+    # Sorting - handle both sort_by and sort params
+    effective_sort = sort if sort else sort_by
+    if effective_sort == 'rating' or effective_sort == 'highest':
         query = query.order_by(Review.rating.desc())
-    elif sort_by == 'likes':
+    elif effective_sort == 'likes' or effective_sort == 'popular':
         query = query.order_by(Review.likes_count.desc())
-    else:  # recent
+    else:  # recent / newest
         query = query.order_by(Review.created_at.desc())
     
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -108,8 +122,6 @@ def create_review():
     
     if not content:
         errors['content'] = 'Review content is required'
-    elif len(content) < 50:
-        errors['content'] = 'Review must be at least 50 characters'
     
     if errors:
         return jsonify({'error': 'Validation failed', 'details': errors}), 400
@@ -118,15 +130,6 @@ def create_review():
     anime = Anime.query.get(anime_id)
     if not anime:
         return jsonify({'error': 'Anime not found'}), 404
-    
-    # Check if user already reviewed this anime
-    existing_review = Review.query.filter_by(
-        user_id=current_user_id,
-        anime_id=anime_id
-    ).first()
-    
-    if existing_review:
-        return jsonify({'error': 'You have already reviewed this anime'}), 409
     
     # Create review
     review = Review(
@@ -186,8 +189,8 @@ def update_review(review_id):
     
     if 'content' in data:
         content = data['content'].strip()
-        if not content or len(content) < 50:
-            return jsonify({'error': 'Review must be at least 50 characters'}), 400
+        if not content:
+            return jsonify({'error': 'Review content cannot be empty'}), 400
         review.content = content
     
     try:

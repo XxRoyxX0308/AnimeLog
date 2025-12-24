@@ -18,19 +18,22 @@ export default function HomePage() {
   const [trendingAnime, setTrendingAnime] = useState([])
   const [recentAnime, setRecentAnime] = useState([])
   const [recentReviews, setRecentReviews] = useState([])
+  const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trendingRes, recentRes, reviewsRes] = await Promise.all([
+        const [trendingRes, recentRes, reviewsRes, statsRes] = await Promise.all([
           animeAPI.getTrending(8),
           animeAPI.getRecent(6),
-          reviewsAPI.getList({ limit: 4, sort: 'newest' })
+          reviewsAPI.getList({ limit: 4, sort: 'newest' }),
+          animeAPI.getStats()
         ])
         setTrendingAnime(trendingRes.data.anime || [])
         setRecentAnime(recentRes.data.anime || [])
         setRecentReviews(reviewsRes.data.reviews || [])
+        setStats(statsRes.data.stats || null)
       } catch (error) {
         console.error('Failed to fetch home data:', error)
       } finally {
@@ -92,15 +95,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { label: 'Anime Titles', value: '10,000+', icon: PlayCircleIcon },
-              { label: 'Active Users', value: '50,000+', icon: SparklesIcon },
-              { label: 'Reviews Written', value: '100,000+', icon: StarIcon },
-              { label: 'Episodes Logged', value: '5M+', icon: ClockIcon },
+              { label: 'Anime Titles', value: stats?.anime_count ?? 0, icon: PlayCircleIcon },
+              { label: 'Active Users', value: stats?.user_count ?? 0, icon: SparklesIcon },
+              { label: 'Reviews Written', value: stats?.review_count ?? 0, icon: StarIcon },
+              { label: 'Episodes Logged', value: stats?.episodes_logged ?? 0, icon: ClockIcon },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <stat.icon className="w-8 h-8 mx-auto mb-2 text-anime-primary" />
                 <div className="text-2xl md:text-3xl font-display font-bold text-white">
-                  {stat.value}
+                  {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                 </div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>

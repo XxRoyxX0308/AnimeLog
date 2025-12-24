@@ -30,7 +30,6 @@ export default function ReviewModal({ anime, review = null, onClose, onSave }) {
     const newErrors = {}
     if (rating === 0) newErrors.rating = 'Please select a rating'
     if (!content.trim()) newErrors.content = 'Please write your review'
-    if (content.trim().length < 50) newErrors.content = 'Review must be at least 50 characters'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -165,9 +164,9 @@ export default function ReviewModal({ anime, review = null, onClose, onSave }) {
               {errors.content ? (
                 <p className="text-anime-error text-sm">{errors.content}</p>
               ) : (
-                <p className="text-gray-500 text-xs">Minimum 50 characters</p>
+                <p className="text-gray-500 text-xs"></p>
               )}
-              <span className={`text-xs ${content.length < 50 ? 'text-gray-500' : 'text-anime-success'}`}>
+              <span className="text-xs text-gray-500">
                 {content.length} characters
               </span>
             </div>

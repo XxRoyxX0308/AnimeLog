@@ -33,6 +33,7 @@ def get_anime_list():
     status = request.args.get('status', '').strip()
     type_filter = request.args.get('type', '').strip()
     season = request.args.get('season', '').strip()
+    year = request.args.get('year', '').strip()
     sort_by = request.args.get('sort_by', 'rating')  # rating, title, newest
     
     query = Anime.query
@@ -56,7 +57,16 @@ def get_anime_list():
         query = query.filter(Anime.type == type_filter)
     
     if season:
-        query = query.filter(Anime.season == season)
+        query = query.filter(Anime.season.ilike(f'%{season}%'))
+    
+    if year:
+        # Year can be in season field like "Fall 2024" or in aired_from date
+        query = query.filter(
+            or_(
+                Anime.season.ilike(f'%{year}%'),
+                db.extract('year', Anime.aired_from) == int(year)
+            )
+        )
     
     # Sorting
     if sort_by == 'rating':
@@ -105,6 +115,26 @@ def get_anime_detail(anime_id):
             data['user_watchlist'] = watchlist_entry.to_dict(include_anime=False)
     
     return jsonify({'anime': data}), 200
+
+
+@anime_bp.route('/stats', methods=['GET'])
+def get_stats():
+    """Get site-wide statistics (Public endpoint)"""
+    from app.models import User, Review
+    
+    anime_count = Anime.query.count()
+    user_count = User.query.count()
+    review_count = Review.query.count()
+    episodes_logged = db.session.query(db.func.sum(WatchList.progress)).scalar() or 0
+    
+    return jsonify({
+        'stats': {
+            'anime_count': anime_count,
+            'user_count': user_count,
+            'review_count': review_count,
+            'episodes_logged': episodes_logged
+        }
+    }), 200
 
 
 @anime_bp.route('/genres', methods=['GET'])
@@ -194,3 +224,24 @@ def create_anime():
         'message': 'Anime created successfully',
         'anime': anime.to_dict()
     }), 201
+
+
+@anime_bp.route('/<int:anime_id>', methods=['DELETE'])
+@jwt_required()
+def delete_anime(anime_id):
+    """Delete an anime entry (Admin only in production)"""
+    anime = Anime.query.get(anime_id)
+    
+    if not anime:
+        return jsonify({'error': 'Anime not found'}), 404
+    
+    try:
+        db.session.delete(anime)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete anime'}), 500
+    
+    return jsonify({
+        'message': 'Anime deleted successfully'
+    }), 200

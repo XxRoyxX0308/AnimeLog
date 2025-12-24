@@ -58,23 +58,32 @@ def get_user_stats(user_id):
     # Watchlist stats
     watchlist_entries = WatchList.query.filter_by(user_id=user_id).all()
     
+    # Get all user reviews for average rating calculation
+    user_reviews = Review.query.filter_by(user_id=user_id).all()
+    
+    # Calculate average rating from reviews
+    if user_reviews:
+        avg_rating = sum(r.rating for r in user_reviews) / len(user_reviews)
+    else:
+        avg_rating = 0.0
+    
     stats = {
+        'total_anime': len(watchlist_entries),
         'anime_count': len(watchlist_entries),
         'watching': sum(1 for e in watchlist_entries if e.status == 'watching'),
         'completed': sum(1 for e in watchlist_entries if e.status == 'completed'),
         'on_hold': sum(1 for e in watchlist_entries if e.status == 'on_hold'),
         'dropped': sum(1 for e in watchlist_entries if e.status == 'dropped'),
         'plan_to_watch': sum(1 for e in watchlist_entries if e.status == 'plan_to_watch'),
+        'total_episodes': sum(e.progress for e in watchlist_entries),
         'episodes_watched': sum(e.progress for e in watchlist_entries),
-        'reviews_count': user.reviews.count(),
-        'comments_count': user.comments.count()
+        'total_reviews': len(user_reviews),
+        'reviews_count': len(user_reviews),
+        'comments_count': user.comments.count(),
+        'average_rating': round(avg_rating, 1)
     }
     
-    # Average score
-    scored = [e for e in watchlist_entries if e.score]
-    stats['average_score'] = round(sum(e.score for e in scored) / len(scored), 1) if scored else 0
-    
-    return jsonify({'stats': stats}), 200
+    return jsonify(stats), 200
 
 
 @users_bp.route('/dashboard', methods=['GET'])
@@ -91,12 +100,25 @@ def get_dashboard():
     # Get stats
     watchlist_entries = WatchList.query.filter_by(user_id=current_user_id).all()
     
+    # Get all user reviews for average rating calculation
+    user_reviews = Review.query.filter_by(user_id=current_user_id).all()
+    
+    # Calculate average rating from reviews
+    if user_reviews:
+        avg_rating = sum(r.rating for r in user_reviews) / len(user_reviews)
+    else:
+        avg_rating = 0.0
+    
     stats = {
-        'anime_count': len(watchlist_entries),
+        'total_anime': len(watchlist_entries),
         'watching': sum(1 for e in watchlist_entries if e.status == 'watching'),
         'completed': sum(1 for e in watchlist_entries if e.status == 'completed'),
-        'episodes_watched': sum(e.progress for e in watchlist_entries),
-        'reviews_count': user.reviews.count()
+        'on_hold': sum(1 for e in watchlist_entries if e.status == 'on_hold'),
+        'dropped': sum(1 for e in watchlist_entries if e.status == 'dropped'),
+        'plan_to_watch': sum(1 for e in watchlist_entries if e.status == 'plan_to_watch'),
+        'total_episodes': sum(e.progress for e in watchlist_entries),
+        'total_reviews': len(user_reviews),
+        'average_rating': round(avg_rating, 1)
     }
     
     # Recent activity

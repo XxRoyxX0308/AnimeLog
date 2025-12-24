@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { reviewsAPI } from '../lib/api'
+import { useAuthStore } from '../store/authStore'
 import ReviewCard from '../components/reviews/ReviewCard'
 import Pagination from '../components/ui/Pagination'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -11,6 +12,7 @@ import {
   ClockIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest', icon: ClockIcon },
@@ -20,6 +22,8 @@ const SORT_OPTIONS = [
 
 export default function CommunityPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
@@ -40,9 +44,9 @@ export default function CommunityPage() {
         })
         setReviews(res.data.reviews || [])
         setPagination({
-          page: res.data.page || 1,
-          pages: res.data.pages || 1,
-          total: res.data.total || 0
+          page: res.data.pagination?.page || res.data.page || 1,
+          pages: res.data.pagination?.pages || res.data.pages || 1,
+          total: res.data.pagination?.total || res.data.total || 0
         })
       } catch (error) {
         console.error('Failed to fetch reviews:', error)
@@ -64,6 +68,31 @@ export default function CommunityPage() {
       newParams.delete('page')
     }
     setSearchParams(newParams)
+  }
+
+  const handleLike = async (reviewId) => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to like reviews')
+      navigate('/login')
+      return
+    }
+    try {
+      await reviewsAPI.like(reviewId)
+      // Update the local review state to reflect the like
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.id === reviewId
+            ? {
+                ...r,
+                user_liked: !r.user_liked,
+                likes_count: r.user_liked ? r.likes_count - 1 : r.likes_count + 1
+              }
+            : r
+        )
+      )
+    } catch (error) {
+      toast.error('Failed to like review')
+    }
   }
 
   return (
@@ -138,7 +167,7 @@ export default function CommunityPage() {
         ) : reviews.length > 0 ? (
           <div className="space-y-6">
             {reviews.map((review) => (
-              <ReviewCard key={review.id} review={review} showAnime expanded />
+              <ReviewCard key={review.id} review={review} showAnime expanded onLike={handleLike} />
             ))}
           </div>
         ) : (

@@ -146,9 +146,6 @@ class Review(db.Model):
     # Relationships
     comments = db.relationship('Comment', backref='review', lazy='dynamic', cascade='all, delete-orphan')
     
-    # Unique constraint: one review per user per anime
-    __table_args__ = (db.UniqueConstraint('user_id', 'anime_id', name='unique_user_anime_review'),)
-    
     def to_dict(self, include_anime=False, include_comments=False):
         data = {
             'id': self.id,
@@ -186,20 +183,24 @@ class Comment(db.Model):
     review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False, index=True)
     
     content = db.Column(db.Text, nullable=False)
+    likes_count = db.Column(db.Integer, default=0)
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     def to_dict(self):
+        user_data = self.author.to_dict() if self.author else None
         return {
             'id': self.id,
             'user_id': self.user_id,
             'review_id': self.review_id,
             'content': self.content,
+            'likes_count': self.likes_count,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
-            'author': self.author.to_dict() if self.author else None
+            'author': user_data,
+            'user': user_data  # Add user key for frontend compatibility
         }
     
     def __repr__(self):

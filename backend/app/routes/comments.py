@@ -139,3 +139,27 @@ def delete_comment(comment_id):
         return jsonify({'error': 'Failed to delete comment'}), 500
     
     return jsonify({'message': 'Comment deleted successfully'}), 200
+
+
+@comments_bp.route('/<int:comment_id>/like', methods=['POST'])
+@jwt_required()
+def like_comment(comment_id):
+    """Like a comment (Authenticated)"""
+    comment = Comment.query.get(comment_id)
+    
+    if not comment:
+        return jsonify({'error': 'Comment not found'}), 404
+    
+    # Simple like increment (in production, you'd track who liked)
+    comment.likes_count = (comment.likes_count or 0) + 1
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to like comment'}), 500
+    
+    return jsonify({
+        'message': 'Comment liked',
+        'likes_count': comment.likes_count
+    }), 200

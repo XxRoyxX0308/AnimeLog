@@ -15,6 +15,7 @@ import {
   XMarkIcon,
   PlusIcon
 } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 
 const SORT_OPTIONS = [
   { value: 'popular', label: 'Most Popular' },
@@ -68,14 +69,14 @@ export default function CatalogPage() {
         ...(status && { status }),
         ...(season && { season }),
         ...(year && { year }),
-        sort
+        sort_by: sort === 'popular' ? 'rating' : sort === 'newest' ? 'newest' : sort === 'rating' ? 'rating' : 'title'
       }
       const res = await animeAPI.getList(params)
       setAnime(res.data.anime || [])
       setPagination({
-        page: res.data.page || 1,
-        pages: res.data.pages || 1,
-        total: res.data.total || 0
+        page: res.data.pagination?.page || res.data.page || 1,
+        pages: res.data.pagination?.pages || res.data.pages || 1,
+        total: res.data.pagination?.total || res.data.total || 0
       })
     } catch (error) {
       console.error('Failed to fetch anime:', error)
@@ -104,6 +105,20 @@ export default function CatalogPage() {
 
   const clearFilters = () => {
     setSearchParams({})
+  }
+
+  const handleDeleteAnime = async (animeId) => {
+    if (!confirm('Are you sure you want to delete this anime? This will also delete all associated reviews and watchlist entries.')) {
+      return
+    }
+    try {
+      await animeAPI.delete(animeId)
+      toast.success('Anime deleted successfully')
+      fetchAnime() // Refresh the list
+    } catch (error) {
+      toast.error('Failed to delete anime')
+      console.error('Delete anime error:', error)
+    }
   }
 
   const hasActiveFilters = genre || status || season || year
@@ -281,7 +296,12 @@ export default function CatalogPage() {
               }
             >
               {anime.map((item) => (
-                <AnimeCard key={item.id} anime={item} view={viewMode} />
+                <AnimeCard 
+                  key={item.id} 
+                  anime={item} 
+                  view={viewMode} 
+                  onDelete={isAuthenticated ? handleDeleteAnime : undefined}
+                />
               ))}
             </div>
 

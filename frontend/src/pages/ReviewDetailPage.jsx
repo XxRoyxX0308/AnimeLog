@@ -65,6 +65,7 @@ export default function ReviewDetailPage() {
 
   const handleLike = async () => {
     if (!isAuthenticated) {
+      toast.error('Please sign in to like reviews')
       navigate('/login')
       return
     }
@@ -109,6 +110,24 @@ export default function ReviewDetailPage() {
       toast.success('Comment deleted')
     } catch (error) {
       toast.error('Failed to delete comment')
+    }
+  }
+
+  const handleLikeComment = async (commentId) => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to like comments')
+      navigate('/login')
+      return
+    }
+    try {
+      const res = await commentsAPI.like(commentId)
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, likes_count: res.data.likes_count } : c
+        )
+      )
+    } catch (error) {
+      toast.error('Failed to like comment')
     }
   }
 
@@ -304,7 +323,7 @@ export default function ReviewDetailPage() {
                 <div key={comment.id} className="p-4 hover:bg-anime-dark-700/30 transition-colors">
                   <div className="flex gap-3">
                     <Link to={`/users/${comment.user?.id}`} className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-anime-dark-600 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-anime-primary to-anime-secondary flex items-center justify-center">
                         {comment.user?.avatar_url ? (
                           <img
                             src={comment.user.avatar_url}
@@ -331,7 +350,7 @@ export default function ReviewDetailPage() {
                             {new Date(comment.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        {user?.id === comment.user?.id && (
+                        {isAuthenticated && user?.id === comment.user?.id && (
                           <button
                             onClick={() => handleDeleteComment(comment.id)}
                             className="text-gray-500 hover:text-anime-error transition-colors"
@@ -341,6 +360,16 @@ export default function ReviewDetailPage() {
                         )}
                       </div>
                       <p className="text-gray-300 mt-1">{comment.content}</p>
+                      {/* Like button */}
+                      <div className="flex items-center gap-4 mt-2">
+                        <button
+                          onClick={() => handleLikeComment(comment.id)}
+                          className="flex items-center gap-1 text-gray-500 hover:text-anime-primary transition-colors text-sm"
+                        >
+                          <HeartIcon className="w-4 h-4" />
+                          <span>{comment.likes_count || 0}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
