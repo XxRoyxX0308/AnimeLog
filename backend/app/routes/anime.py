@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_req
 from sqlalchemy import or_
 from app import db
 from app.models import Anime, WatchList
+from app.decorators import admin_required
 
 anime_bp = Blueprint('anime', __name__)
 
@@ -189,11 +190,12 @@ def get_recent():
     }), 200
 
 
-# Admin routes for managing anime (would require admin middleware in production)
+# Admin routes for managing anime (requires admin role)
 @anime_bp.route('', methods=['POST'])
 @jwt_required()
+@admin_required()
 def create_anime():
-    """Create a new anime entry (Admin only in production)"""
+    """Create a new anime entry (Admin only)"""
     data = request.get_json()
     
     if not data or not data.get('title'):
@@ -228,8 +230,9 @@ def create_anime():
 
 @anime_bp.route('/<int:anime_id>', methods=['DELETE'])
 @jwt_required()
+@admin_required()
 def delete_anime(anime_id):
-    """Delete an anime entry (Admin only in production)"""
+    """Delete an anime entry (Admin only)"""
     anime = Anime.query.get(anime_id)
     
     if not anime:

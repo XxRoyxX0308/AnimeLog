@@ -26,7 +26,7 @@ const SORT_OPTIONS = [
 
 export default function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, isAdmin } = useAuthStore()
   const [anime, setAnime] = useState([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
@@ -205,8 +205,8 @@ export default function CatalogPage() {
               </button>
             </div>
 
-            {/* Add Anime Button */}
-            {isAuthenticated && (
+            {/* Add Anime Button - Admin Only */}
+            {isAuthenticated && isAdmin() && (
               <button
                 onClick={() => setShowAddModal(true)}
                 className="btn btn-primary flex items-center gap-2"
@@ -300,9 +300,10 @@ export default function CatalogPage() {
                   key={item.id} 
                   anime={item} 
                   view={viewMode} 
-                  onDelete={isAuthenticated ? handleDeleteAnime : undefined}
+                  onDelete={isAuthenticated && isAdmin() ? handleDeleteAnime : undefined}
                 />
               ))}
+              
             </div>
 
             {/* Pagination */}

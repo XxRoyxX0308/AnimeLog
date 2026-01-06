@@ -11,6 +11,22 @@ export const useAuthStore = create(
       isLoading: true,
       _hasHydrated: false,
 
+      // Role-based access control helpers
+      isAdmin: () => {
+        const user = get().user
+        return user?.role === 'admin'
+      },
+      
+      hasRole: (role) => {
+        const user = get().user
+        return user?.role === role
+      },
+      
+      hasAnyRole: (...roles) => {
+        const user = get().user
+        return user ? roles.includes(user.role) : false
+      },
+
       // Called when store rehydrates from localStorage
       setHasHydrated: (state) => {
         set({ _hasHydrated: state })

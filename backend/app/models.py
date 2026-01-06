@@ -16,6 +16,9 @@ class User(db.Model):
     avatar_url = db.Column(db.String(500), default='')
     bio = db.Column(db.Text, default='')
     
+    # Role-based access control (user, admin, editor, moderator, etc.)
+    role = db.Column(db.String(20), default='user', nullable=False, index=True)
+    
     # OAuth fields
     oauth_provider = db.Column(db.String(50), nullable=True)
     oauth_id = db.Column(db.String(255), nullable=True)
@@ -35,6 +38,7 @@ class User(db.Model):
             'username': self.username,
             'avatar_url': self.avatar_url,
             'bio': self.bio,
+            'role': self.role,
             'created_at': self.created_at.isoformat(),
             'stats': {
                 'reviews_count': self.reviews.count(),
@@ -45,6 +49,10 @@ class User(db.Model):
         if include_email:
             data['email'] = self.email
         return data
+    
+    def is_admin(self):
+        """Check if user has admin role"""
+        return self.role == 'admin'
     
     def __repr__(self):
         return f'<User {self.username}>'
