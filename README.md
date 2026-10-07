@@ -2,6 +2,8 @@
 
 A modern anime tracking and community platform where users can discover anime, track their watchlist, and share reviews with the community.
 
+**Start Here: <https://animelog.vercel.app/>**
+
 ![AnimeLog](https://img.shields.io/badge/AnimeLog-v1.0.0-FF6B9D?style=for-the-badge)
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react)
 ![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=flat-square&logo=flask)
